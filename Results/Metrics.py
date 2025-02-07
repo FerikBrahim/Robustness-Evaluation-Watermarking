@@ -1,0 +1,45 @@
+import cv2
+import numpy as np
+from skimage.metrics import peak_signal_noise_ratio, structural_similarity, mean_squared_error
+
+# Function to calculate Bit Error Rate (BER)
+def bit_error_rate(original_watermark, extracted_watermark):
+    return np.sum(original_watermark != extracted_watermark) / np.size(original_watermark)
+
+# Function to calculate Correlation Coefficient
+def correlation_coefficient(original, extracted):
+    return np.corrcoef(original.flatten(), extracted.flatten())[0, 1]
+
+# Function to calculate Normalized Cross-Correlation (NCC)
+def normalized_cross_correlation(original, extracted):
+    original = original.astype(np.float32)
+    extracted = extracted.astype(np.float32)
+    return np.sum(original * extracted) / (np.sqrt(np.sum(original**2)) * np.sqrt(np.sum(extracted**2)))
+
+# Load the images (assuming grayscale images)
+host_image_path = 'B3.jpeg'
+watermarked_image_path = 'watermarked_xray.jpeg'
+host_image = cv2.imread(host_image_path, cv2.IMREAD_GRAYSCALE)
+watermarked_image = cv2.imread(watermarked_image_path, cv2.IMREAD_GRAYSCALE)
+
+# Load original and extracted watermarks (assuming binary images)
+original_watermark_path = 'B3.jpeg'
+extracted_watermark_path = 'watermarked_xray.jpeg'
+original_watermark = cv2.imread(original_watermark_path, cv2.IMREAD_GRAYSCALE)
+extracted_watermark = cv2.imread(extracted_watermark_path, cv2.IMREAD_GRAYSCALE)
+
+# Calculate metrics
+psnr_value = peak_signal_noise_ratio(host_image, watermarked_image)
+ssim_value, _ = structural_similarity(host_image, watermarked_image, full=True)
+mse_value = mean_squared_error(host_image, watermarked_image)
+ber_value = bit_error_rate(original_watermark, extracted_watermark)
+correlation_value = correlation_coefficient(original_watermark, extracted_watermark)
+ncc_value = normalized_cross_correlation(original_watermark, extracted_watermark)
+
+# Print results
+print(f'Peak Signal-to-Noise Ratio (PSNR): {psnr_value:.2f} dB')
+print(f'Structural Similarity Index (SSIM): {ssim_value:.4f}')
+print(f'Mean Squared Error (MSE): {mse_value:.6f}')
+print(f'Bit Error Rate (BER): {ber_value:.6f}')
+print(f'Correlation Coefficient: {correlation_value:.4f}')
+print(f'Normalized Cross-Correlation (NCC): {ncc_value:.4f}')
